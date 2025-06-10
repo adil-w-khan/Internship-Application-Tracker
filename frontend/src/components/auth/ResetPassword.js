@@ -1,20 +1,29 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import LoadingSpinner from '../common/LoadingSpinner';
+import passwordService from '../../services/passwordService';
 
-const Register = () => {
+const ResetPassword = () => {
+  const [searchParams] = useSearchParams();
   const [formData, setFormData] = useState({
-    email: '',
     password: '',
     confirmPassword: '',
   });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [token, setToken] = useState('');
   
-  const { register } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const tokenParam = searchParams.get('token');
+    if (!tokenParam) {
+      setErrors({ token: 'Invalid or missing reset token' });
+    } else {
+      setToken(tokenParam);
+    }
+  }, [searchParams]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -23,7 +32,6 @@ const Register = () => {
       [name]: value
     }));
     
-    // Clear error when user starts typing
     if (errors[name]) {
       setErrors(prev => ({
         ...prev,
@@ -34,12 +42,6 @@ const Register = () => {
 
   const validateForm = () => {
     const newErrors = {};
-    
-    if (!formData.email) {
-      newErrors.email = 'Email is required';
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Please enter a valid email';
-    }
     
     if (!formData.password) {
       newErrors.password = 'Password is required';
@@ -69,37 +71,59 @@ const Register = () => {
     setErrors({});
     
     try {
-      await register(formData.email, formData.password);
+      await passwordService.resetPassword(token, formData.password);
       setSuccess(true);
       
-      // Redirect to login after 2 seconds
+      // Redirect to login after 3 seconds
       setTimeout(() => {
         navigate('/login');
-      }, 2000);
+      }, 3000);
     } catch (error) {
       setErrors({
-        submit: error.error || 'Registration failed. Please try again.'
+        submit: error.error || 'Failed to reset password. The link may have expired.'
       });
     } finally {
       setLoading(false);
     }
   };
 
+  if (errors.token) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4">
+        <div className="max-w-md w-full text-center">
+          <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+            <div className="bg-red-100 rounded-full p-3 w-16 h-16 mx-auto flex items-center justify-center mb-4">
+              <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+              </svg>
+            </div>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">Invalid Reset Link</h2>
+            <p className="text-gray-600 mb-6">{errors.token}</p>
+            <Link
+              to="/login"
+              className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition duration-200"
+            >
+              Back to Login
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (success) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4">
-        <div className="max-w-md w-full">
-          <div className="card text-center">
-            <div className="mb-4">
-              <svg className="mx-auto h-16 w-16 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        <div className="max-w-md w-full text-center">
+          <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+            <div className="bg-green-100 rounded-full p-3 w-16 h-16 mx-auto flex items-center justify-center mb-4">
+              <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <h2 className="text-2xl font-semibold text-gray-900 mb-2">
-              Registration Successful!
-            </h2>
-            <p className="text-gray-600 mb-4">
-              Your account has been created successfully.
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">Password Reset Successful!</h2>
+            <p className="text-gray-600 mb-6">
+              Your password has been updated successfully. You can now sign in with your new password.
             </p>
             <p className="text-sm text-gray-500">
               Redirecting to login page...
@@ -119,52 +143,30 @@ const Register = () => {
             InternTracker
           </h1>
           <h2 className="text-2xl font-semibold text-gray-900 mb-2">
-            Create your account
+            Reset Your Password
           </h2>
           <p className="text-gray-600">
-            Start tracking your internship applications today
+            Enter your new password below
           </p>
         </div>
 
-        {/* Register Form */}
+        {/* Reset Form */}
         <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Email Field */}
-            <div >
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Email Address
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                value={formData.email}
-                onChange={handleChange}
-                className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2 border ${errors.email ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
-                placeholder="Enter your email"
-              />
-              {errors.email && (
-                <p className="mt-1 text-sm text-red-600">{errors.email}</p>
-              )}
-            </div>
-
-            {/* Password Field */}
+            {/* New Password Field */}
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                Password
+                New Password
               </label>
               <input
                 id="password"
                 name="password"
                 type="password"
-                autoComplete="new-password"
                 required
                 value={formData.password}
                 onChange={handleChange}
-                className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2 border ${errors.password ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
-                placeholder="Enter your password"
+                className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2 border ${errors.password ? 'border-red-500' : ''}`}
+                placeholder="Enter your new password"
               />
               {errors.password && (
                 <p className="mt-1 text-sm text-red-600">{errors.password}</p>
@@ -177,18 +179,17 @@ const Register = () => {
             {/* Confirm Password Field */}
             <div>
               <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
-                Confirm Password
+                Confirm New Password
               </label>
               <input
                 id="confirmPassword"
                 name="confirmPassword"
                 type="password"
-                autoComplete="new-password"
                 required
                 value={formData.confirmPassword}
                 onChange={handleChange}
-                className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2 border ${errors.confirmPassword ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
-                placeholder="Confirm your password"
+                className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2 border ${errors.confirmPassword ? 'border-red-500' : ''}`}
+                placeholder="Confirm your new password"
               />
               {errors.confirmPassword && (
                 <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>
@@ -211,25 +212,22 @@ const Register = () => {
               {loading ? (
                 <>
                   <LoadingSpinner size="small" />
-                  <span className="ml-2">Creating account...</span>
+                  <span className="ml-2">Resetting...</span>
                 </>
               ) : (
-                'Create Account'
+                'Reset Password'
               )}
             </button>
           </form>
 
-          {/* Login Link */}
+          {/* Back to Login Link */}
           <div className="mt-6 text-center">
-            <p className="text-sm text-gray-600">
-              Already have an account?{' '}
-              <Link
-                to="/login"
-                className="font-medium text-blue-600 hover:text-blue-500 transition duration-200"
-              >
-                Sign in here
-              </Link>
-            </p>
+            <Link
+              to="/login"
+              className="text-sm font-medium text-blue-600 hover:text-blue-500 transition duration-200"
+            >
+              Back to Login
+            </Link>
           </div>
         </div>
       </div>
@@ -237,4 +235,4 @@ const Register = () => {
   );
 };
 
-export default Register;
+export default ResetPassword;

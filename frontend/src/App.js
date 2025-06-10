@@ -9,6 +9,8 @@ import ApplicationList from './components/applications/ApplicationList';
 import ApplicationForm from './components/applications/ApplicationForm';
 import ApplicationDetail from './components/applications/ApplicationDetail';
 import LoadingSpinner from './components/common/LoadingSpinner';
+import ResetPassword from './components/auth/ResetPassword';
+import UserSettings from './components/settings/UserSettings';
 
 // Component to handle authenticated redirects
 const AuthRedirect = () => {
@@ -54,6 +56,16 @@ function App() {
               element={
                 <ProtectedRoute>
                   <ApplicationList />
+                </ProtectedRoute>
+              } 
+            />
+            {/* Reset password route */}
+            <Route path="/reset-password" element={<ResetPassword />} />
+            <Route 
+              path="/settings" 
+              element={
+                <ProtectedRoute>
+                  <UserSettings />
                 </ProtectedRoute>
               } 
             />

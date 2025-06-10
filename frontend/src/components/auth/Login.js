@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import LoadingSpinner from '../common/LoadingSpinner';
+import ForgotPasswordModal from './ForgotPasswordModal';
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -10,12 +11,12 @@ const Login = () => {
   });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
   
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   
-  // Get the page user was trying to visit before login
   const from = location.state?.from?.pathname || '/dashboard';
 
   const handleChange = (e) => {
@@ -25,7 +26,6 @@ const Login = () => {
       [name]: value
     }));
     
-    // Clear error when user starts typing
     if (errors[name]) {
       setErrors(prev => ({
         ...prev,
@@ -79,7 +79,7 @@ const Login = () => {
       <div className="max-w-md w-full space-y-8">
         {/* Header */}
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-primary-600 mb-2">
+          <h1 className="text-3xl font-bold text-blue-600 mb-2">
             InternTracker
           </h1>
           <h2 className="text-2xl font-semibold text-gray-900 mb-2">
@@ -91,7 +91,7 @@ const Login = () => {
         </div>
 
         {/* Login Form */}
-        <div className="card">
+        <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Email Field */}
             <div>
@@ -106,7 +106,7 @@ const Login = () => {
                 required
                 value={formData.email}
                 onChange={handleChange}
-                className={`input-field ${errors.email ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
+                className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2 border ${errors.email ? 'border-red-500' : ''}`}
                 placeholder="Enter your email"
               />
               {errors.email && (
@@ -116,9 +116,18 @@ const Login = () => {
 
             {/* Password Field */}
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                Password
-              </label>
+              <div className="flex items-center justify-between">
+                <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                  Password
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setShowForgotPassword(true)}
+                  className="text-sm text-blue-600 hover:text-blue-500 transition duration-200"
+                >
+                  Forgot password?
+                </button>
+              </div>
               <input
                 id="password"
                 name="password"
@@ -127,7 +136,7 @@ const Login = () => {
                 required
                 value={formData.password}
                 onChange={handleChange}
-                className={`input-field ${errors.password ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
+                className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2 border ${errors.password ? 'border-red-500' : ''}`}
                 placeholder="Enter your password"
               />
               {errors.password && (
@@ -146,7 +155,7 @@ const Login = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full btn-primary flex justify-center items-center disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition duration-200 flex justify-center items-center disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? (
                 <>
@@ -165,7 +174,7 @@ const Login = () => {
               Don't have an account?{' '}
               <Link
                 to="/register"
-                className="font-medium text-primary-600 hover:text-primary-500 transition duration-200"
+                className="font-medium text-blue-600 hover:text-blue-500 transition duration-200"
               >
                 Sign up here
               </Link>
@@ -173,6 +182,12 @@ const Login = () => {
           </div>
         </div>
       </div>
+
+      {/* Forgot Password Modal */}
+      <ForgotPasswordModal
+        isOpen={showForgotPassword}
+        onClose={() => setShowForgotPassword(false)}
+      />
     </div>
   );
 };
