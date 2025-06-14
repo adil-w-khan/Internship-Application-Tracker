@@ -11,6 +11,7 @@ import ApplicationDetail from './components/applications/ApplicationDetail';
 import LoadingSpinner from './components/common/LoadingSpinner';
 import ResetPassword from './components/auth/ResetPassword';
 import UserSettings from './components/settings/UserSettings';
+import PrivacyPolicy from './pages/PrivacyPolicy';
 
 // Component to handle authenticated redirects
 const AuthRedirect = () => {
@@ -39,6 +40,7 @@ function App() {
             {/* Auth routes */}
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             
             {/* Protected routes */}
             <Route 

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import LoadingSpinner from '../common/LoadingSpinner';
 import passwordService from '../../services/passwordService';
+import AuthLayout from '../layout/AuthLayout';
 
 const ResetPassword = () => {
   const [searchParams] = useSearchParams();
@@ -89,6 +90,7 @@ const ResetPassword = () => {
 
   if (errors.token) {
     return (
+      <AuthLayout>
       <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4">
         <div className="max-w-md w-full text-center">
           <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
@@ -108,11 +110,13 @@ const ResetPassword = () => {
           </div>
         </div>
       </div>
+      </AuthLayout>
     );
   }
 
   if (success) {
     return (
+      <AuthLayout>
       <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4">
         <div className="max-w-md w-full text-center">
           <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
@@ -131,16 +135,18 @@ const ResetPassword = () => {
           </div>
         </div>
       </div>
+      </AuthLayout>
     );
   }
 
   return (
+    <AuthLayout>
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         {/* Header */}
         <div className="text-center">
           <h1 className="text-3xl font-bold text-blue-600 mb-2">
-            InternTracker
+            AppTrack By Adil
           </h1>
           <h2 className="text-2xl font-semibold text-gray-900 mb-2">
             Reset Your Password
@@ -232,6 +238,7 @@ const ResetPassword = () => {
         </div>
       </div>
     </div>
+    </AuthLayout>
   );
 };
 

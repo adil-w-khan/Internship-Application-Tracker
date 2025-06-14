@@ -22,8 +22,8 @@ const Header = () => {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link to="/dashboard" className="flex-shrink-0">
-            <h1 className="text-xl font-bold text-primary-600">
-              InternTracker
+            <h1 className="text-xl font-bold text-blue-600">
+              AppTrack By Adil
             </h1>
           </Link>
 

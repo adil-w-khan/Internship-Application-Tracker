@@ -3,6 +3,8 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import LoadingSpinner from '../common/LoadingSpinner';
 import ForgotPasswordModal from './ForgotPasswordModal';
+import AuthLayout from '../layout/AuthLayout';
+
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -75,12 +77,13 @@ const Login = () => {
   };
 
   return (
+    <AuthLayout>
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         {/* Header */}
         <div className="text-center">
           <h1 className="text-3xl font-bold text-blue-600 mb-2">
-            InternTracker
+            AppTrack By Adil
           </h1>
           <h2 className="text-2xl font-semibold text-gray-900 mb-2">
             Sign in to your account
@@ -189,6 +192,7 @@ const Login = () => {
         onClose={() => setShowForgotPassword(false)}
       />
     </div>
+    </AuthLayout>
   );
 };
 

@@ -1,5 +1,6 @@
 import React from 'react';
 import Header from './header';
+import Footer from './Footer';
 
 const Layout = ({ children }) => {
   return (
@@ -8,6 +9,7 @@ const Layout = ({ children }) => {
       <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         {children}
       </main>
+      <Footer />
     </div>
   );
 };
