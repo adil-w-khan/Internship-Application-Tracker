@@ -1,11 +1,17 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Layout from '../layout/Layout';
 import { useAuth } from '../../contexts/AuthContext';
 import LoadingSpinner from '../common/LoadingSpinner';
+import DeleteAccountModal from './DeleteAccountModal';
 import passwordService from '../../services/passwordService';
+import applicationService from '../../services/applicationService';
+import accountService from '../../services/accountService';
 
 const UserSettings = () => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+  
   const [passwordForm, setPasswordForm] = useState({
     currentPassword: '',
     newPassword: '',
@@ -14,6 +20,9 @@ const UserSettings = () => {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState('');
+  const [exportLoading, setExportLoading] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const handlePasswordChange = (e) => {
     const { name, value } = e.target;
@@ -86,6 +95,46 @@ const UserSettings = () => {
     }
   };
 
+  const handleExportData = async () => {
+    try {
+      setExportLoading(true);
+      const data = await applicationService.exportUserData();
+      
+      // Create and download JSON file
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `apptrack-data-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      
+      setSuccess('Data exported successfully!');
+    } catch (error) {
+      setErrors({ export: error.error || 'Failed to export data' });
+    } finally {
+      setExportLoading(false);
+    }
+  };
+
+  const handleDeleteAccount = async (password) => {
+    try {
+      setDeleteLoading(true);
+      await accountService.deleteAccount(password);
+      
+      // Log out and redirect
+      logout();
+      navigate('/');
+    } catch (error) {
+      setErrors({ delete: error.error || 'Failed to delete account' });
+      setShowDeleteModal(false);
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
   return (
     <Layout>
       <div className="max-w-4xl mx-auto space-y-8">
@@ -102,14 +151,18 @@ const UserSettings = () => {
               <button className="w-full text-left px-3 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-md">
                 Account
               </button>
-              <button className="w-full text-left px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md">
-                Privacy
-              </button>
             </nav>
           </div>
 
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
+            {/* Success Message */}
+            {success && (
+              <div className="bg-green-50 border border-green-200 rounded-md p-3">
+                <p className="text-sm text-green-600">{success}</p>
+              </div>
+            )}
+
             {/* Profile Information */}
             <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6">
               <h2 className="text-lg font-semibold text-gray-900 mb-4">Profile Information</h2>
@@ -138,12 +191,6 @@ const UserSettings = () => {
             <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6">
               <h2 className="text-lg font-semibold text-gray-900 mb-4">Change Password</h2>
               
-              {success && (
-                <div className="bg-green-50 border border-green-200 rounded-md p-3 mb-4">
-                  <p className="text-sm text-green-600">{success}</p>
-                </div>
-              )}
-
               <form onSubmit={handlePasswordSubmit} className="space-y-4">
                 {/* Current Password */}
                 <div>
@@ -237,29 +284,75 @@ const UserSettings = () => {
               <h2 className="text-lg font-semibold text-gray-900 mb-4">Account Actions</h2>
               
               <div className="space-y-4">
-                <div className="flex items-center justify-between py-2">
+                {/* Export Data */}
+                <div className="flex items-center justify-between py-3 border-b border-gray-200">
                   <div>
                     <h3 className="text-sm font-medium text-gray-900">Export Data</h3>
-                    <p className="text-sm text-gray-500">Download all your application data</p>
+                    <p className="text-sm text-gray-500">Download all your application data as JSON</p>
                   </div>
-                  <button className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-1 px-3 rounded text-sm transition duration-200">
-                    Export
+                  <button 
+                    onClick={handleExportData}
+                    disabled={exportLoading}
+                    className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg text-sm transition duration-200 flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {exportLoading ? (
+                      <>
+                        <LoadingSpinner size="small" />
+                        <span className="ml-2">Exporting...</span>
+                      </>
+                    ) : (
+                      <>
+                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        Export
+                      </>
+                    )}
                   </button>
                 </div>
                 
-                <div className="flex items-center justify-between py-2 border-t border-gray-200 pt-4">
+                {/* Export Error */}
+                {errors.export && (
+                  <div className="bg-red-50 border border-red-200 rounded-md p-3">
+                    <p className="text-sm text-red-600">{errors.export}</p>
+                  </div>
+                )}
+                
+                {/* Delete Account */}
+                <div className="flex items-center justify-between py-3">
                   <div>
                     <h3 className="text-sm font-medium text-red-900">Delete Account</h3>
                     <p className="text-sm text-red-500">Permanently delete your account and all data</p>
                   </div>
-                  <button className="bg-red-600 hover:bg-red-700 text-white font-medium py-1 px-3 rounded text-sm transition duration-200">
+                  <button 
+                    onClick={() => setShowDeleteModal(true)}
+                    className="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg text-sm transition duration-200 flex items-center"
+                  >
+                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
                     Delete
                   </button>
                 </div>
+
+                {/* Delete Error */}
+                {errors.delete && (
+                  <div className="bg-red-50 border border-red-200 rounded-md p-3">
+                    <p className="text-sm text-red-600">{errors.delete}</p>
+                  </div>
+                )}
               </div>
             </div>
           </div>
         </div>
+
+        {/* Delete Account Modal */}
+        <DeleteAccountModal
+          isOpen={showDeleteModal}
+          onClose={() => setShowDeleteModal(false)}
+          onConfirm={handleDeleteAccount}
+          loading={deleteLoading}
+        />
       </div>
     </Layout>
   );

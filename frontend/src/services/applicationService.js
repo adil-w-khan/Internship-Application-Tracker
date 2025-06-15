@@ -80,6 +80,25 @@ const applicationService = {
       throw error.response?.data || { error: 'Failed to fetch statistics' };
     }
   },
+
+  // Export all user data
+  exportUserData: async () => {
+    try {
+      const [applications, stats] = await Promise.all([
+        applicationService.getAllApplications(),
+        applicationService.getApplicationStats()
+      ]);
+      
+      return {
+        exportDate: new Date().toISOString(),
+        totalApplications: applications.length,
+        statistics: stats,
+        applications: applications
+      };
+    } catch (error) {
+      throw error.response?.data || { error: 'Failed to export data' };
+    }
+  },
 };
 
 export default applicationService;
