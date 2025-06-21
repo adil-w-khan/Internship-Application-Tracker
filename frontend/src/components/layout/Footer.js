@@ -40,6 +40,14 @@ const Footer = () => {
               </li>
               <li>
                 <Link
+                    to="/terms-of-service"
+                    className="text-gray-300 hover:text-blue-400 text-sm transition duration-200"
+                >
+                    Terms of Service
+                </Link>
+            </li>
+              <li>
+                <Link
                   to="/privacy-policy"
                   className="text-gray-300 hover:text-blue-400 text-sm transition duration-200"
                 >
