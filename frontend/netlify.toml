@@ -5,6 +5,7 @@
 [build.environment]
   REACT_APP_API_BASE_URL = "https://internship-application-tracker-production.up.railway.app/api"
   REACT_APP_ENVIRONMENT = "production"
+  CI = "false"
 
 # Handle client-side routing
 [[redirects]]
