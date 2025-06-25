@@ -206,7 +206,7 @@ const PrivacyPolicy = () => {
                 If you have any questions about this Privacy Policy or our practices, please contact us:
               </p>
               <div className="bg-gray-50 p-4 rounded-lg">
-                <p className="text-gray-700"><strong>Email:</strong> contact@apptrack.com</p>
+                <p className="text-gray-700"><strong>Email:</strong> apptrackbyadil@gmail.com</p>
                 <p className="text-gray-700"><strong>Subject:</strong> Privacy Policy Inquiry</p>
               </div>
               <p className="text-gray-700 mt-4">

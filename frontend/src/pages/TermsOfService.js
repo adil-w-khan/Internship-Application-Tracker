@@ -228,7 +228,7 @@ const TermsOfService = () => {
                 If you have any questions about these Terms of Service, please contact us:
               </p>
               <div className="bg-gray-50 p-4 rounded-lg">
-                <p className="text-gray-700"><strong>Email:</strong> contact@apptrack.com</p>
+                <p className="text-gray-700"><strong>Email:</strong> apptrackbyadil@gmail.com</p>
                 <p className="text-gray-700"><strong>Subject:</strong> Terms of Service Inquiry</p>
               </div>
             </section>
