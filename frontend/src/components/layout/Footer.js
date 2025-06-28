@@ -82,11 +82,7 @@ const Footer = () => {
             <p className="text-gray-400 text-sm">
               © {currentYear} AppTrack By Adil. All rights reserved.
             </p>
-            <div className="mt-3 sm:mt-0">
-              <p className="text-gray-500 text-xs">
-                Built with ❤️ for students seeking internships
-              </p>
-            </div>
+            
           </div>
         </div>
       </div>
