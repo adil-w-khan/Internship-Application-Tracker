@@ -39,7 +39,7 @@ public class User {
         this.createdAt = LocalDateTime.now();
     }
 
-    // Getters and Setters (generate these in your IDE)
+    // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
